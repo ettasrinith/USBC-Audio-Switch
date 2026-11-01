@@ -1,4 +1,4 @@
-# USBC Audio Switcher
+# Earphone Input Changer
 
 Tiny root app to reroute USB-C audio on Android 14–17.
 
