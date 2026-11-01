@@ -1,4 +1,4 @@
-# Earphone Input Changer
+# USBC Audio Switch
 
 Tiny root app to reroute USB-C audio on Android 14–17.
 
@@ -54,3 +54,8 @@ Plain aapt2 + javac + d8 + apksigner, no gradle.
 ## License
 
 MIT
+
+## Credits
+
+- [Lesser AudioSwitch](https://play.google.com/store/apps/details?id=com.nordskog.LesserAudioSwitch) by Robert Nordskog — the original idea and the device fake-connect technique this app is based on.
+- [LesserAudioSwitchAndroid11](https://github.com/michioxd/LesserAudioSwitchAndroid11) by michioxd — reference for porting the technique to modern Android via the audio service.
