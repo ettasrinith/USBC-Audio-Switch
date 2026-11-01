@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="USB-C Audio Router (root)"
+        android:textSize="20sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Output"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingTop="12dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button android:id="@+id/btnOutSpeaker"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Speaker"/>
+        <Button android:id="@+id/btnOutEarphone"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Earphone"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/outStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Microphone"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingTop="12dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <Button android:id="@+id/btnMicPhone"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Phone mic"/>
+        <Button android:id="@+id/btnMicEarphone"
+            android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Earphone mic"/>
+    </LinearLayout>
+
+    <TextView android:id="@+id/micStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"/>
+
+    <TextView android:id="@+id/devicesView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:typeface="monospace"
+        android:textSize="11sp"
+        android:paddingTop="6dp"
+        android:text="stored devices: (none yet)"/>
+
+    <CheckBox android:id="@+id/autoMic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Auto: route mic to phone when earphone plugs in"/>
+
+    <CheckBox android:id="@+id/outStateMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Advanced: output via device-state (for ROMs ignoring force-use)"/>
+
+    <Button android:id="@+id/btnDebug"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Debug check (device states via root)"/>
+
+    <ScrollView android:id="@+id/logScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#11000000"
+        android:paddingTop="8dp">
+        <TextView android:id="@+id/log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:typeface="monospace"
+            android:textSize="12sp"/>
+    </ScrollView>
+</LinearLayout>
