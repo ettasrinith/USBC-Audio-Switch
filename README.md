@@ -1,4 +1,4 @@
-# USB Audio Router
+# USBC Audio Switcher
 
 Tiny root app to reroute USB-C audio on Android 14–17.
 
