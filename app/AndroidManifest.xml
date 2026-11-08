@@ -4,8 +4,12 @@
 
     <application
         android:label="USB Audio Router"
-        android:allowBackup="false">
-        <activity android:name=".MainActivity" android:exported="true">
+        android:allowBackup="false"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
