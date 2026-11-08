@@ -15,7 +15,7 @@ mkdir -p "$OUT/gen" "$OUT/classes"
     --manifest app/AndroidManifest.xml "$OUT/res.zip" \
     --min-sdk-version 26 --target-sdk-version 34 --java "$OUT/gen"
 
-javac --release 8 -nowarn -cp "$SDK/platforms/android-34/android.jar" \
+javac --release 8 -encoding UTF-8 -nowarn -cp "$SDK/platforms/android-34/android.jar" \
     -d "$OUT/classes" "$OUT"/gen/com/lasm/usb/R.java app/src/com/lasm/usb/*.java
 
 # d8 from build-tools or a standalone r8 jar:
