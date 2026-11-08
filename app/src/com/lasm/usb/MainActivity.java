@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         setContentView(R.layout.main);
         prefs = getSharedPreferences("usbroute", 0);
-        Root.ensureOutDir(this);
+        Root.init(this);
 
         outStatus = (TextView) findViewById(R.id.outStatus);
         micStatus = (TextView) findViewById(R.id.micStatus);
