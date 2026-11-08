@@ -83,8 +83,12 @@ public class Helper {
             int at = entry.indexOf('@');
             if (at <= 0) continue;
             try {
-                ADDR.put((int) Long.parseLong(entry.substring(0, at).trim(), 16),
-                        entry.substring(at + 1));
+                // the app sends "0xTYPE@addr"; Long.parseLong rejects the 0x
+                // prefix, so strip it first (without this every address would
+                // be silently dropped and the helper would fall back to probing)
+                String hex = entry.substring(0, at).trim();
+                if (hex.startsWith("0x") || hex.startsWith("0X")) hex = hex.substring(2);
+                ADDR.put((int) Long.parseLong(hex, 16), entry.substring(at + 1));
             } catch (Throwable ignored) {
             }
         }
