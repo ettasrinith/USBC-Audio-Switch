@@ -14,6 +14,7 @@ import java.util.HashMap;
  *
  * usage: Helper out speaker|earphone [addrs]
  *               mic phone|earphone [addrs]
+ *               bt speaker|restore [addrs]
  *               force speaker|headphones|none
  *               force-rec speaker|none
  *               debug
@@ -28,8 +29,17 @@ public class Helper {
     static final int IN_USB_DEVICE = 0x80001000;   // DEVICE_BIT_IN | 0x1000
     static final int IN_USB_HEADSET = 0x82000000;  // DEVICE_BIT_IN | 0x2000000
     static final int IN_BUILTIN_MIC = 0x80000004;  // DEVICE_BIT_IN | 0x4
+    static final int OUT_BT_A2DP = 0x80;           // classic A2DP output
+    static final int OUT_BT_SCO = 0x10;            // hfp/hsp output
+    static final int OUT_BLE_HEADSET = 0x10000000; // LE audio headset
+    static final int OUT_BLE_SPEAKER = 0x20000000; // LE audio speaker
+    static final int IN_BT_SCO_HEADSET = 0x80000008;  // DEVICE_BIT_IN | 0x8
+    static final int IN_BLE_HEADSET = 0x90000000;     // DEVICE_BIT_IN | 0x10000000
     static final int STATE_UNAVAILABLE = 0;
     static final int STATE_AVAILABLE = 1;
+
+    /** bluetooth output devices, tried in this order */
+    static final int[] BT_OUTS = {OUT_BT_A2DP, OUT_BLE_HEADSET, OUT_BLE_SPEAKER, OUT_BT_SCO};
 
     /** addresses reported by the app, keyed by internal device type */
     static final HashMap<Integer, String> ADDR = new HashMap<>();
@@ -37,15 +47,22 @@ public class Helper {
     public static void main(String[] args) {
         String result;
         try {
-            if (args.length >= 3 && ("out".equals(args[0]) || "mic".equals(args[0]))) {
+            if (args.length >= 3 && ("out".equals(args[0]) || "mic".equals(args[0])
+                    || "bt".equals(args[0]))) {
                 parseAddrs(args[2]);
             }
             if (args.length >= 2 && "out".equals(args[0])) {
                 result = switchDevices(new int[]{OUT_USB_HEADSET, OUT_USB_DEVICE},
                         "speaker".equals(args[1]) ? STATE_UNAVAILABLE : STATE_AVAILABLE);
             } else if (args.length >= 2 && "mic".equals(args[0])) {
-                result = switchDevices(new int[]{IN_USB_DEVICE, IN_USB_HEADSET},
+                result = switchDevices(
+                        new int[]{IN_USB_DEVICE, IN_USB_HEADSET, IN_BT_SCO_HEADSET, IN_BLE_HEADSET},
                         "phone".equals(args[1]) ? STATE_UNAVAILABLE : STATE_AVAILABLE);
+            } else if (args.length >= 2 && "bt".equals(args[0])) {
+                // fake-disconnect BT audio so media falls back to the speaker,
+                // or restore the state the BT stack expects
+                result = switchDevices(BT_OUTS,
+                        "speaker".equals(args[1]) ? STATE_UNAVAILABLE : STATE_AVAILABLE);
             } else if (args.length >= 2 && "force".equals(args[0])) {
                 // FOR_MEDIA: 0 none, 1 speaker, 2 headphones
                 int cfg = "speaker".equals(args[1]) ? 1 : "headphones".equals(args[1]) ? 2 : 0;
@@ -57,6 +74,7 @@ public class Helper {
                 result = debugDump();
             } else {
                 result = "usage: Helper out speaker|earphone [addrs] | mic phone|earphone [addrs]"
+                        + " | bt speaker|restore [addrs]"
                         + " | force speaker|headphones|none | force-rec speaker|none | debug";
             }
         } catch (Throwable t) {
@@ -282,14 +300,19 @@ public class Helper {
         try {
             return ((Integer) AudioDeviceInfo.class.getMethod("getInternalType").invoke(d)).intValue();
         } catch (Throwable t) {
-            int pub = d.getType();
-            boolean in = d.isSource();
-            switch (pub) {
-                case 12: return in ? 0x80000800 : 0x2000;    // TYPE_USB_ACCESSORY
-                case 13: return in ? 0x80001000 : 0x4000;    // TYPE_USB_DEVICE
-                case 22: return in ? 0x82000000 : 0x4000000; // TYPE_USB_HEADSET
-                default: return in ? (0x80000000 | pub) : pub;
-            }
+        int pub = d.getType();
+        boolean in = d.isSource();
+        switch (pub) {
+            case 12: return in ? 0x80000800 : 0x2000;    // TYPE_USB_ACCESSORY
+            case 13: return in ? 0x80001000 : 0x4000;    // TYPE_USB_DEVICE
+            case 22: return in ? 0x82000000 : 0x4000000; // TYPE_USB_HEADSET
+            case 7: return in ? 0x80000008 : 0x10;       // TYPE_BLUETOOTH_SCO
+            case 8: return 0x80;                         // TYPE_BLUETOOTH_A2DP
+            case 26: return in ? 0x90000000 : 0x10000000; // TYPE_BLE_HEADSET
+            case 27: return 0x20000000;                  // TYPE_BLE_SPEAKER
+            case 28: return 0x40000000;                  // TYPE_BLE_BROADCAST
+            default: return in ? (0x80000000 | pub) : pub;
+        }
         }
     }
 
@@ -387,7 +410,9 @@ public class Helper {
     static String debugDump() {
         StringBuilder sb = new StringBuilder();
         sb.append("-- policy manager --\n");
-        int[] all = {OUT_USB_DEVICE, OUT_USB_HEADSET, IN_BUILTIN_MIC, IN_USB_DEVICE, IN_USB_HEADSET};
+        int[] all = {OUT_USB_DEVICE, OUT_USB_HEADSET, IN_BUILTIN_MIC, IN_USB_DEVICE,
+                IN_USB_HEADSET, OUT_BT_A2DP, OUT_BT_SCO, OUT_BLE_HEADSET,
+                IN_BT_SCO_HEADSET, IN_BLE_HEADSET};
         for (int d : all) {
             String addr = realAddress(d);
             sb.append(name(d)).append("(0x").append(Integer.toHexString(d)).append(") addr=")
@@ -426,6 +451,12 @@ public class Helper {
             case IN_BUILTIN_MIC: return "IN_BUILTIN_MIC";
             case IN_USB_DEVICE: return "IN_USB_DEVICE";
             case IN_USB_HEADSET: return "IN_USB_HEADSET";
+            case OUT_BT_A2DP: return "OUT_BT_A2DP";
+            case OUT_BT_SCO: return "OUT_BT_SCO";
+            case OUT_BLE_HEADSET: return "OUT_BLE_HEADSET";
+            case OUT_BLE_SPEAKER: return "OUT_BLE_SPEAKER";
+            case IN_BT_SCO_HEADSET: return "IN_BT_SCO_HEADSET";
+            case IN_BLE_HEADSET: return "IN_BLE_HEADSET";
             default: return "0x" + Integer.toHexString(d);
         }
     }
